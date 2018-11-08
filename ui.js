@@ -50,6 +50,19 @@ var rajsFirstDataView = {
         }
     }
 }
+
+var plotlyDataView = {    
+    id: "plotlyView",
+    view: "template",
+    template: "",
+    type: {
+        width: 261,
+        height: 300
+    },
+    container: "plotly_div",
+    // view: "template",
+    // content: "plt_chart"
+}
        
 function single_select(item){
         id = item._id;                
@@ -71,6 +84,7 @@ function single_select(item){
         $$("my_win").show();
         $$("templateWin").define("template", slideText)
         $$("templateWin").refresh()  
+
         make_plotly();
 }
 
@@ -85,14 +99,8 @@ webix.ready(function() {
             {
                 "cols": [
                         rajsFirstDataView,
-                        {
-
-                            // "data": scatterData,
-                            // "type": "scatter",
-                            // "xValue": "#a#",
-                            // "value": "#d#",
-                            // "view": "chart"
-                        }
+                        //plotlyDataView,
+                        { }
                         ]                
             }
         ]
@@ -100,7 +108,10 @@ webix.ready(function() {
 });
 
 function make_plotly() {
-    var data = [
+    Plotly.plot("plotly_div", slideData, layout);
+}
+
+var slideData = [
         { x: [5, 6, 7, 8], y: [12, 9, 15, 12],  mode:'lines+markers'},
         { x: [5, 6, 7, 8], y: [10, 15, 13, 17], mode:'markers'},
         { x: [5, 6, 7, 8], y: [16, 5, 11, 10],  mode:'lines'}
@@ -108,12 +119,9 @@ function make_plotly() {
 
  var layout = {
               title:'Plotly - Digital Slide Archive',
-              height: 750,
-              width: 750
+              height: 300,
+              width: 400
             };
-
-    Plotly.newPlot('plotly_div', data, layout);           
-}
 
   	
 /*webix.ready(function() {
