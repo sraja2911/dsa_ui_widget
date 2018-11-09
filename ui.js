@@ -24,20 +24,19 @@ var window = webix.ui({
 })
 
 
-  webix.type(webix.ui.dataview,{
-            name:"smallThumb",
-            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >",
-            width: 140,
-            height: 140
-        });
+webix.type(webix.ui.dataview,{
+    name:"smallThumb",
+    template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >",
+    width: 140,
+    height: 140
+});
 
-        webix.type(webix.ui.dataview,{
-            name:"bigThumb",
-            template: "<br>#name# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=256' >",
-            width: 260,
-            height: 360
-        });
-
+webix.type(webix.ui.dataview,{
+    name:"bigThumb",
+    template: "<br>#name# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=256' >",
+    width: 260,
+    height: 360
+});
 
 
 var rajsFirstDataView = {
@@ -54,11 +53,9 @@ var rajsFirstDataView = {
            var ar_selected = $$("slideDataview").getSelectedItem(true);
 
            if (ar_selected.length == 1)  {
-                // single_select(id, this);
                 single_select(ar_selected[0])
             }
             else {
-
                 multi_select(ar_selected);
             }
         }
@@ -92,9 +89,11 @@ function single_select(item){
                    "\\n" + "Cancer_Grading: "+ Cancer_Grading+  
                    "\\n" + "Associated_Genes: " + "Associated_Genes" +  
                    "\\n" + "Slide Name: " + item_name );
-        $$("my_win").show();
-        $$("templateWin").define("template", slideText);
-        $$("templateWin").refresh();  
+        // $$("my_win").show();
+        // $$("templateWin").define("template", slideText);
+        // $$("templateWin").refresh();  
+        $$("sliderdata").define("template", slideText);
+        $$("sliderdata").refresh();  
 }
 
 var layout = {
@@ -129,6 +128,10 @@ function multi_select(ar_selected){
         var name = []
         var perc = []
         var wb_count = []
+        var Stain_Types=[]
+        var Cancer_Grading =[]
+        var Associated_Genes = []
+        var slideText = []
         slideRecords.each(function(obj){
            console.log(this.length);
            console.log(obj.name);
@@ -136,11 +139,25 @@ function multi_select(ar_selected){
            name.push(obj.name);
            perc.push(obj.meta.Blood_Red_Percentage);
            wb_count.push(obj.meta.White_Blood_Cell_Count);                                
+           Stain_Types.push(obj.meta.Stain_Types);
+           Cancer_Grading.push(obj.meta.Cancer_Grading);
+           Associated_Genes.push(obj.meta.Associated_Genes);
+           nextSlideText= "SlideID: " + obj._id + 
+                   "\\n" + "Stain_Types: " + obj.meta.Stain_Types +  
+                   "\\n "+ "Blood_Red_Percentage: " + obj.meta.Blood_Red_Percentage + 
+                   "\\n" + "White_Blood_Cell_Count: " + obj.meta.White_Blood_Cell_Count +  
+                   "\\n" + "Cancer_Grading: "+ obj.meta.Cancer_Grading+  
+                   "\\n" + "Associated_Genes: " + obj.meta.Associated_Genes +  
+                   "\\n" + "Slide Name: " + obj.name ;
+
+           slideText = slideText + "\\n" + nextSlideText
         });
         var data = [
             {x:name, y:perc, mode:'lines+markers', name:"BRC Percentage"},
             {x:name, y:wb_count, mode:'lines+markers', name:"WBC Count"}
             ]
+        $$("sliderdata").define("template", slideText);
+        $$("sliderdata").refresh();    
 
         Plotly.newPlot("plotly_div", data, layout);
 }
@@ -189,7 +206,7 @@ webix.ready(function() {
                             {view:"template",template:"DV Controls", type:"header"},
                             dataViewControls,
                             rajsFirstDataView,
-                            { view: "template", template: "Footer", gravity:0.2}
+                            { view: "template", template: "Footer", id: "sliderdata", gravity:0.2}
 
 
                             ]},                        
