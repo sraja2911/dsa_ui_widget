@@ -72,22 +72,48 @@ var rajsFirstDataView = {
         }
 }
 
+ function makePromise(url) {
+        // Sets up a promise in the proper way using webix
+        return new webix.promise(function(success, fail) {
+            webix.ajax(url, function(text){
+                if (text) success (text);
+                else fail(text.error)
+            })
+        })
+    }
+
+function cBioresultsdisplay(cohortID){         
+        promise = makePromise('http://www.cbioportal.org/webservice.do?cmd=getCaseLists&cancer_study_id=' + cohortID)
+        
+        promise.then(function(result){
+            console.log(promise);
+            return promise;    
+        }, function(err){
+            console.log(err);
+        });
+             
+    }
+
 function single_select(item){
-        id = item._id;                
+        id = item._id;
+        cohortID = 'gbm_tcga_pub2013#summary'                
         if ("meta" in item) {
             var Stain_Types = item.meta.Stain_Types;
             var Blood_Red_Percentage = item.meta.Blood_Red_Percentage;
             var White_Blood_Cell_Count = item.meta.White_Blood_Cell_Count;
             var Cancer_Grading = item.meta.Cancer_Grading;
-            var Associated_Genes = item.meta.Associated_Genes;                    
+            var Associated_Genes = item.meta.Associated_Genes;            
         }
+
+        Associated_Genes = cBioresultsdisplay(cohortID);
+
         var  item_name = item.name;
         slideText= ("SlideID: " + id + 
                    "\\n" + "Stain_Types: " + Stain_Types +  
                    "\\n "+ "Blood_Red_Percentage: " + Blood_Red_Percentage + 
                    "\\n" + "White_Blood_Cell_Count: " + White_Blood_Cell_Count +  
                    "\\n" + "Cancer_Grading: "+ Cancer_Grading+  
-                   "\\n" + "Associated_Genes: " + "Associated_Genes" +  
+                   "\\n" + "Associated_Genes: " + Associated_Genes +  
                    "\\n" + "Slide Name: " + item_name );
         // $$("my_win").show();
         // $$("templateWin").define("template", slideText);

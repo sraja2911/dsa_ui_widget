@@ -23,19 +23,33 @@ var window = webix.ui({
     }   
 })
 
+
+  webix.type(webix.ui.dataview,{
+            name:"smallThumb",
+            template: "<br>#slideAbbrev# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=128' >",
+            width: 140,
+            height: 140
+        });
+
+        webix.type(webix.ui.dataview,{
+            name:"bigThumb",
+            template: "<br>#name# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail?width=256' >",
+            width: 260,
+            height: 360
+        });
+
+
+
 var rajsFirstDataView = {
-    template: "<br>#name# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail' >",
+//    template: "<br>#name# <img src='" + config.BASE_URL + "/item/#_id#/tiles/thumbnail' >",
+    
     view: "dataview",
     id: "slideDataview",
     url: config.BASE_URL + "/item?folderId=5bd2222ee62914004e463a54&limit=50&sort=lowerName&sortdir=1&height=" + thumbHeight,
-    type: {
-        width: 261,
-        height: 300
-    },
+    type: "smallThumb",
 
     "select": true,
     "multiselect": true,
-    
     "on": { 'onAfterSelect': function(id) { 
            var ar_selected = $$("slideDataview").getSelectedItem(true);
 
@@ -48,9 +62,19 @@ var rajsFirstDataView = {
                 multi_select(ar_selected);
             }
         }
-    }
+    },
+    scheme:
+        {
+            $init: function(obj)
+                {
+                    //create a shorter abbreviation for each item
+                    obj['slideAbbrev'] = obj['name'].split(".")[0];
+                }
+
+
+        }
 }
-       
+
 function single_select(item){
         id = item._id;                
         if ("meta" in item) {
@@ -69,12 +93,88 @@ function single_select(item){
                    "\\n" + "Associated_Genes: " + "Associated_Genes" +  
                    "\\n" + "Slide Name: " + item_name );
         $$("my_win").show();
-        $$("templateWin").define("template", slideText)
-        $$("templateWin").refresh()  
-        make_plotly();
+        $$("templateWin").define("template", slideText);
+        $$("templateWin").refresh();  
 }
 
+var layout = {
+    title: 'Digital Slides Plot, Digital Slide Archive Platform, Emory University',
+    xaxis: {
+        title: 'Slide Name',
+        titlefont: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+        }
+    },
+    height:600,
+    width:600,
+    showlegend : true,
+    yaxis: {
+    title: 'Slide Values',
+        titlefont: {
+          family: 'Courier New, monospace',
+          size: 18,
+          color: '#7f7f7f'
+        }
+  }
+};
+
 function multi_select(ar_selected){
+
+        var slideRecords = webix.toArray(ar_selected);
+
+        data = []
+        var update = {}        
+        var name = []
+        var perc = []
+        var wb_count = []
+        slideRecords.each(function(obj){
+           console.log(this.length);
+           console.log(obj.name);
+           console.log(obj._id);           
+           name.push(obj.name);
+           perc.push(obj.meta.Blood_Red_Percentage);
+           wb_count.push(obj.meta.White_Blood_Cell_Count);                                
+        });
+        var data = [
+            {x:name, y:perc, mode:'lines+markers', name:"BRC Percentage"},
+            {x:name, y:wb_count, mode:'lines+markers', name:"WBC Count"}
+            ]
+
+        Plotly.newPlot("plotly_div", data, layout);
+}
+
+
+var dataViewControls = {
+
+    cols:[{view:"button", id:"btnSmallThumb", label:"smallThumbs", click:  function(id) {
+                webix.message("small Raj")
+                $$('slideDataview').define('type','smallThumb');
+                $$('slideDataview').render();
+
+     }
+
+
+
+    },
+
+
+         {view:"button",id:"btnLargeThumb",label:"largeThumbs", click: function(id)
+            {
+
+                webix.message("large Raj")
+                $$('slideDataview').define('type','bigThumb');
+                $$('slideDataview').render();
+
+
+
+            }
+
+
+
+     }]    
+
 
 }
 
@@ -84,72 +184,25 @@ webix.ready(function() {
         rows: [
             {
                 "cols": [
-                        rajsFirstDataView,
-                        {
+                        { rows: [ 
 
-                            // "data": scatterData,
-                            // "type": "scatter",
-                            // "xValue": "#a#",
-                            // "value": "#d#",
-                            // "view": "chart"
-                        }
+                            {view:"template",template:"DV Controls", type:"header"},
+                            dataViewControls,
+                            rajsFirstDataView,
+                            { view: "template", template: "Footer", gravity:0.2}
+
+
+                            ]},                        
+                          { view:"template", content:"plotly_div"}
                         ]                
-            }
+            }, 
+            // {
+            //     view: "template",
+            //     template: "Footer",
+            //     id : "Footer",
+            //     height : 250,
+            //     width : 261
+            // }           
         ]
     })
 });
-
-function make_plotly() {
-    var data = [
-        { x: [5, 6, 7, 8], y: [12, 9, 15, 12],  mode:'lines+markers'},
-        { x: [5, 6, 7, 8], y: [10, 15, 13, 17], mode:'markers'},
-        { x: [5, 6, 7, 8], y: [16, 5, 11, 10],  mode:'lines'}
-    ];
-
- var layout = {
-              title:'Plotly - Digital Slide Archive',
-              height: 750,
-              width: 750
-            };
-
-    Plotly.newPlot('plotly_div', data, layout);           
-}
-
-  	
-/*webix.ready(function() {
-    webix.ui({
-        "rows": [{
-                "template": "Raj PutsHisHeaderHere",
-                "height": 50,
-                "view": "template"
-            },
-            {
-                "cols": [{
-                    "type": "line",
-                    "cols": [{
-                        "type": "line",
-                        "cols": [{
-                            "type": "line",
-                            "cols": [
-                                rajsFirstDataView,
-                                {
-                                   // "data": scatterData,
-                                    // "type": "scatter",
-                                    // "xValue": "#a#",
-                                    // "value": "#d#",
-                                    // "view": "chart"
-                                }
-                            ]
-                        }]
-                    }]
-                }]
-            },
-            {
-                "template": "Footer ",
-                "height": 50,
-                "view": "template"
-            }
-        ]
-    })
-});*/
-
